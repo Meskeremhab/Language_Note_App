@@ -1,7 +1,7 @@
-﻿from django.urls import path, include
-from rest_framework.routers import DefaultRouter
+﻿from django.urls import path
+from .views import ExpressionListCreate, ExpressionDetail
 
-router = DefaultRouter()
 urlpatterns = [
-    *router.urls,
+    path('expressions/', ExpressionListCreate.as_view(), name='expression-list'),
+    path('expressions/<int:pk>/', ExpressionDetail.as_view(), name='expression-detail'),
 ]

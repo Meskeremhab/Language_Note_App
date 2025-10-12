@@ -1,8 +1,19 @@
-﻿from django.urls import path, include
-from rest_framework.routers import DefaultRouter
-from .views import DeckViewSet
+﻿from django.urls import path
+from .views import (
+    DeckListCreate, DeckDetail,
+    WordListCreate, WordDetail,
+    TagListCreate,
+)
 
-router = DefaultRouter()
-router.register(r"decks", DeckViewSet, basename="deck")
+urlpatterns = [
+    path('decks/', DeckListCreate.as_view(), name='deck-list'),
+    path('decks/<int:pk>/', DeckDetail.as_view(), name='deck-detail'),
 
-urlpatterns = [path("", include(router.urls))]
+    # words (nested by deck OR flat)
+    path('decks/<int:deck_id>/words/', WordListCreate.as_view(), name='deck-words'),
+    path('words/', WordListCreate.as_view(), name='word-list'),
+    path('words/<int:pk>/', WordDetail.as_view(), name='word-detail'),
+
+    # tags
+    path('tags/', TagListCreate.as_view(), name='tag-list'),
+]
