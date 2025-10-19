@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block title %}Expressions · Language Notebook{% endblock %}
+{% block content %}
+<div class="grid" style="gap:16px;">
+  <div class="card">
+    <h1 style="margin-bottom:12px;">Expressions</h1>
+    <form id="expr-form" class="grid grid-2" style="gap:12px;">
+      <input id="text" placeholder="expression" required>
+      <input id="region" placeholder="region (optional)">
+      <input id="meaning" placeholder="meaning" class="input" style="grid-column:1/-1;" required>
+      <select id="register">
+        <option value="neutral">neutral</option>
+        <option value="informal">informal</option>
+        <option value="slang">slang</option>
+        <option value="formal">formal</option>
+      </select>
+      <input id="notes" placeholder="usage notes (optional)" style="grid-column:1/-1;">
+      <div style="grid-column:1/-1;"><button type="submit">Add</button></div>
+    </form>
+  </div>
+
+  <div class="card">
+    <div style="display:flex; gap:8px; align-items:center; margin-bottom:8px;">
+      <input id="q" placeholder="Search…" class="input">
+      <button id="search">Search</button>
+    </div>
+    <ul id="expr-list" style="list-style:none; padding-left:0;"></ul>
+  </div>
+</div>
+
+<script>
+(async function(){
+  const list = document.getElementById('expr-list');
+  const form = document.getElementById('expr-form');
+  const q = document.getElementById('q');
+
+  async function load(qs='') {
+    list.innerHTML = '<li>Loading…</li>';
+    const url = qs ? `/api/expressions/?search=${encodeURIComponent(qs)}` : '/api/expressions/';
+    const data = await Api.get(url);
+    const items = data.results || data;
+    list.innerHTML = items.map(x => `
+      <li style="padding:10px 0; border-bottom:1px solid #eee; display:grid; grid-template-columns:1fr auto; align-items:center;">
+        <div>
+          <div class="font-semibold">${x.text} <span class="text-sm" style="color:#64748b;">(${x.register}${x.region ? ' · '+x.region : ''})</span></div>
+          <div class="text-sm">${x.meaning}</div>
+          ${x.usage_notes ? `<div class="text-sm" style="font-style:italic;">${x.usage_notes}</div>` : ''}
+        </div>
+        <button data-del="${x.id}" style="background:#ef4444;">Delete</button>
+      </li>
+    `).join('') || '<li>No items.</li>';
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const body = {
+      text: document.getElementById('text').value,
+      meaning: document.getElementById('meaning').value,
+      region: document.getElementById('region').value,
+      register: document.getElementById('register').value,
+      usage_notes: document.getElementById('notes').value,
+    };
+    await Api.post('/api/expressions/', body);
+    form.reset();
+    load();
+  });
+
+  document.getElementById('search').onclick = () => load(q.value);
+
+  list.addEventListener('click', async (e) => {
+    const id = e.target.getAttribute('data-del');
+    if (!id) return;
+    await Api.del(`/api/expressions/${id}/`);
+    load(q.value);
+  });
+
+  load();
+})();
+</script>
+{% endblock %}

@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}Decks · Language Notebook{% endblock %}
+{% block content %}
+<div class="grid" style="gap:16px;">
+  <div class="card">
+    <h1 style="margin-bottom:12px;">Decks</h1>
+    <form id="deck-form" class="grid grid-2" style="gap:12px;">
+      <input id="deck-name" placeholder="Deck name (e.g. Travel)" class="input" required>
+      <input id="deck-desc" placeholder="Description (optional)" class="input">
+      <div style="grid-column:1/-1;">
+        <button type="submit">Add deck</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="card">
+    <h2 style="margin-bottom:8px;">Your decks</h2>
+    <ul id="deck-list" style="list-style:none; padding-left:0;"></ul>
+  </div>
+</div>
+
+<script>
+(async function(){
+  const list = document.getElementById('deck-list');
+  const form = document.getElementById('deck-form');
+  const nameInput = document.getElementById('deck-name');
+  const descInput = document.getElementById('deck-desc');
+
+  async function loadDecks() {
+    list.innerHTML = '<li>Loading…</li>';
+    const data = await Api.get('/api/decks/');
+    const items = data.results || data;
+    if (!items.length) { list.innerHTML = '<li>No decks yet.</li>'; return; }
+    list.innerHTML = '';
+    for (const d of items) {
+      const li = document.createElement('li');
+      li.style.cssText = "display:grid; grid-template-columns:1fr auto; align-items:center; padding:10px 0; border-bottom:1px solid #eee;";
+      li.innerHTML = `
+        <div>
+          <div class="font-semibold">${d.name}</div>
+          ${d.description ? `<div class="text-sm" style="color:#64748b;">${d.description}</div>` : ''}
+        </div>
+        <div>
+          <button data-del="${d.id}" style="background:#ef4444;">Delete</button>
+        </div>`;
+      list.appendChild(li);
+    }
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    await Api.post('/api/decks/', { name: nameInput.value, description: descInput.value });
+    nameInput.value = ''; descInput.value = '';
+    loadDecks();
+  });
+
+  list.addEventListener('click', async (e) => {
+    const id = e.target.getAttribute('data-del');
+    if (!id) return;
+    await Api.del(`/api/decks/${id}/`);
+    loadDecks();
+  });
+
+  loadDecks();
+})();
+</script>
+{% endblock %}

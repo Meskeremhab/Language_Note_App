@@ -46,9 +46,13 @@ class WordListCreate(generics.ListCreateAPIView):
         if deck_id:
             qs = qs.filter(deck_id=deck_id)
         return qs
-
+    
     def perform_create(self, serializer):
         deck_id = self.kwargs.get("deck_id") or self.request.data.get("deck")
+        from .models import Deck
+        if not Deck.objects.filter(id=deck_id, user=self.request.user).exists():
+            from django.http import Http404
+            raise Http404("Deck not found")
         serializer.save(owner=self.request.user, deck_id=deck_id)
 
 class WordDetail(generics.RetrieveUpdateDestroyAPIView):

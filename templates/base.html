@@ -1,0 +1,42 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>{% block title %}Language Notebook{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+
+  {% csrf_token %}
+  <meta name="csrf-token" content="{{ csrf_token }}">
+  <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+
+</head>
+<body>
+  <header class="site-header">
+    <nav class="nav">
+      <a class="brand" href="{% url 'home_page' %}">Language Notebook</a>
+      <ul class="menu">
+        <li><a href="{% url 'decks_page' %}">Decks</a></li>
+        <li><a href="{% url 'expressions_page' %}">Expressions</a></li>
+        {% if request.user.is_authenticated %}
+          <li class="right"><span>Hi, {{ request.user.username }}</span></li>
+          <li><a href="{% url 'logout' %}">Logout</a></li>
+        {% else %}
+          <li class="right"><a href="{% url 'login' %}">Login</a></li>
+        {% endif %}
+      </ul>
+    </nav>
+  </header>
+
+  <main class="content">
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="site-footer">
+    <p>© {{ now|date:"Y" }} Language Notebook</p>
+  </footer>
+
+  <script src="{% static 'js/scripts.js' %}"></script>
+</body>
+</html>
