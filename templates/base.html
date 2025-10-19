@@ -19,9 +19,17 @@
       <ul class="menu">
         <li><a href="{% url 'decks_page' %}">Decks</a></li>
         <li><a href="{% url 'expressions_page' %}">Expressions</a></li>
+        
         {% if request.user.is_authenticated %}
           <li class="right"><span>Hi, {{ request.user.username }}</span></li>
-          <li><a href="{% url 'logout' %}">Logout</a></li>
+          
+          <li>
+            <form action="{% url 'logout' %}" method="post" style="display:inline;">
+              {% csrf_token %}
+              <button type="submit" class="linklike">Logout</button>
+            </form>
+          </li>
+
         {% else %}
           <li class="right"><a href="{% url 'login' %}">Login</a></li>
         {% endif %}

@@ -24,3 +24,6 @@ button { background:#0f172a; color:#fff; border:none; cursor:pointer; }
 button:hover { opacity:.9; }
 
 .site-footer { text-align:center; color:#64748b; padding:24px 0; }
+
+.linklike { background:none; border:none; color:#cbd5e1; cursor:pointer; padding:0; }
+.linklike:hover { color:#fff; text-decoration: underline; }
